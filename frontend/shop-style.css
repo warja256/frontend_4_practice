@@ -1,0 +1,112 @@
+/* Общие стили */
+body {
+    background-color: #f0f4ff;
+    font-family: 'Comfortaa', sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+    color: #4a6ee0;
+}
+
+/* Контейнер для товаров */
+#products {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Карточка товара */
+.product-card {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(74, 110, 224, 0.2);
+    overflow: hidden;
+    width: 220px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-card h2 {
+    font-size: 1.4em;
+    color: #4a6ee0;
+    margin-bottom: 10px;
+}
+
+.product-card p {
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* Форма фильтрации товаров */
+#filter {
+    border: 3px solid #4a6ee0;
+    border-radius: 10px;
+    padding: 20px;
+    width: 80%;
+    max-width: 500px;
+    margin: 30px auto;
+    background: #fff;
+}
+
+#filter legend {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#filter label {
+    font-size: 1em;
+    margin-right: 15px;
+}
+
+/* Кнопки */
+button {
+    background: #4a6ee0;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #365ac4;
+}
+
+/* Чат */
+#chat {
+    width: 350px;
+    background: #e0e9ff;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 30px auto;
+    box-shadow: 0 4px 15px rgba(74, 110, 224, 0.2);
+}
+
+#messages {
+    height: 200px;
+    overflow-y: auto;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#messageInput {
+    width: calc(100% - 20px);
+    padding: 8px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}

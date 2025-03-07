@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ</title>
+    <link href="style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa" rel="stylesheet">
+</head>
+<body>
+    <h1> Товары</h1>
+    <div id="new-product-form">
+        <form id="create-product-form">
+            <label for="product-name">Название товара:</label><br>
+            <input type="text" id="product-name" required><br>
+            
+            <label for="product-price">Цена:</label><br>
+            <input type="number" id="product-price" step="any" required><br>
+            
+            <label for="product-description">Описание:</label><br>
+            <textarea id="product-description" rows="4" cols="50" required></textarea><br>
+            
+            <div id="product-categories">
+                <legend>Категории:</legend>
+                <label>
+                    <input type="checkbox" name="category" value="Категория 1"> Категория 1
+                </label>
+                <label>
+                    <input type="checkbox" name="category" value="Категория 2"> Категория 2
+                </label>
+                <label>
+                    <input type="checkbox" name="category" value="Категория 3"> Категория 3
+                </label>
+            </div>
+            
+            <button type="submit">Создать товар</button>
+        </form>
+    </div>
+    
+    <div id="products">Тут должны быть карточки</div>
+    <div class="buttons">
+        <button id="del">Удалить товар</button>
+        <button id="edit">Редактировать товар</button>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Код для работы с продуктами, кнопками и запросами к серверу
+            fetch('/products')
+                .then(response => response.json())
+                .then(data => {
+                    const productsDiv = document.getElementById('products');
+                    productsDiv.innerHTML = data.map(product =>
+                        `<div class="product-card" data-id="${product.id}">
+                            <h2>${product.name}</h2>
+                            <p>ID: ${product.id}</p>
+                            <p>Цена: ${product.price} руб.</p>
+                            <p>${product.description}</p>
+                            <p>Категория: ${product.category}</p>
+                        </div>`
+                    ).join('');
+                });
+
+            // Обработчик для кнопки "Добавить товар"
+            document.getElementById('create-product-form').addEventListener('submit', event => {
+                event.preventDefault();
+                
+                const selectedCategories = Array.from(
+                    document.querySelectorAll('#product-categories input[type="checkbox"]:checked')
+                ).map(checkbox => checkbox.value);
+
+                const formData = {
+                    name: document.getElementById('product-name').value,
+                    price: document.getElementById('product-price').value,
+                    description: document.getElementById('product-description').value,
+                    category: selectedCategories                
+                };
+                
+                fetch('/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const productsDiv = document.getElementById('products');
+                    productsDiv.innerHTML += `
+                        <div class="product-card" data-id="${data.id}">
+                            <h2>${data.name}</h2>
+                            <p>ID: ${data.id}</p>
+                            <p>Цена: ${data.price} руб.</p>
+                            <p>${data.description}</p>
+                            <p>Категория: ${data.category.join(', ')}</p>
+                        </div>`;
+                    document.getElementById('create-product-form').reset();
+                });
+            });
+
+            document.getElementById('del').addEventListener('click', () => {
+                    const productIdToDelete = prompt('Введите ID товара для удаления:');
+
+                    fetch('http://localhost:3000/products/' + productIdToDelete, {
+                        method: 'DELETE'
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            const productCard = document.querySelector(`.product-card[data-id="${productIdToDelete}"]`);
+                            if (productCard) {
+                                productCard.remove();
+                            }
+                        } else {
+                            alert('Ошибка при удалении товара');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+
+
+
+            // Обработчик для кнопки "Редактировать товар"
+            document.getElementById('edit').addEventListener('click', () => {
+                const productIdToEdit = prompt('Введите ID товара для редактирования:');
+                const updatedProduct = {
+                    name: prompt('Введите новое название:'),
+                    price: parseFloat(prompt('Введите новую цену:')),
+                    description: prompt('Введите новое описание:'),
+                    category: prompt('Введите новые категории через запятую:').split(',').map(cat => cat.trim())
+                };
+
+                fetch(`/products/${productIdToEdit}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedProduct)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const productCard = document.querySelector(`.product-card[data-id="${data.id}"]`);
+                    if (productCard) {
+                        productCard.innerHTML = `
+                            <h2>${data.name}</h2>
+                            <p>ID: ${data.id}</p>
+                            <p>Цена: ${data.price} руб.</p>
+                            <p>${data.description}</p>
+                            <p>Категория: ${data.category.join(', ')}</p>`;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

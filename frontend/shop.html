@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Магазин</title>
+        <link href="shop-style.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Comfortaa" rel="stylesheet">
+    </head>
+    <body>
+        <h1> Магазин</h1>
+        <div id="filter">
+            <legend>Категории:</legend>
+            <label>
+                <input type="checkbox" name="filter" value="Цена"> Цена
+            </label>
+            <label>
+                <input type="checkbox" name="filter" value="Описание"> Описание
+            </label>
+            <label>
+                <input type="checkbox" name="filter" value="Категории"> Категории
+            </label>
+        </div>
+        <div id="products">Тут должны быть карточки</div>
+
+        <div id="chat">
+            <div id="messages"></div>
+            <input id="messageInput" type="text" placeholder="Введите сообщение" />
+            <button onclick="sendMessage()">Отправить</button>
+        </div>
+
+        <script>
+            const ws = new WebSocket('ws://localhost:8081');
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                const messagesDiv = document.getElementById('messages');
+                if (data.type === 'message') {
+                    messagesDiv.innerHTML += `<p>${data.data.sender}: ${data.data.text}</p>`;
+                } else if (data.type === 'history') {
+                    data.data.forEach((msg) => {
+                        messagesDiv.innerHTML += `<p>${msg.sender}: ${msg.text}</p>`;
+                    });
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket Error:', error);
+            };
+
+            function sendMessage() {
+                const input = document.getElementById('messageInput');
+                const message = {
+                    sender: 'Покупатель',
+                    text: input.value,
+                    time: new Date().toLocaleTimeString(),
+                };
+                ws.send(JSON.stringify(message));
+                input.value = '';
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                fetch('/products')
+                    .then(response => response.json())
+                    .then(data => {
+                        const productsDiv = document.getElementById('products');
+                        productsDiv.innerHTML = data.map(product => 
+                            `<div class="product-card" data-id="${product.id}">
+                                <h2>${product.name}</h2>
+                                <p>Цена: ${product.price} руб.</p>
+                                <p>${product.description}</p>
+                                <p>Категория: ${product.category.join(', ')}</p>
+                            </div>`
+                        ).join('');
+                    })
+                    .catch(error => console.error('Error fetching products:', error));
+            });
+        </script>
+    </body>
+</html>
